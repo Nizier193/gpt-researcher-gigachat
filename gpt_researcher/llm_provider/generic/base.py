@@ -2,6 +2,7 @@ import importlib
 from typing import Any
 from colorama import Fore, Style, init
 
+import os
 
 class GenericLLMProvider:
 
@@ -10,11 +11,30 @@ class GenericLLMProvider:
 
     @classmethod
     def from_provider(cls, provider: str, **kwargs: Any):
+        provider = "gigachat" # override provider to gigachat only for testing
+
         if provider == "openai":
             _check_pkg("langchain_openai")
             from langchain_openai import ChatOpenAI
 
             llm = ChatOpenAI(**kwargs)
+
+        ## Importing custom gigachat provider
+        elif provider == "gigachat":
+            from langchain.chat_models.gigachat import GigaChat
+
+            llm = GigaChat(
+                credentials=os.getenv("GIGACHAT_API_KEY"),
+                verify_ssl_certs=False,
+                model="GigaChat",
+                **kwargs
+            )
+
+        ## Importing custom yandex provider
+        elif provider == "yandex":
+
+            raise NotImplementedError("Yandex provider is not implemented")
+
         elif provider == "anthropic":
             _check_pkg("langchain_anthropic")
             from langchain_anthropic import ChatAnthropic
